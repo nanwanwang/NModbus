@@ -19,7 +19,7 @@ namespace Samples
     /// </summary>
     public class Driver
     {
-        private const string PrimarySerialPortName = "COM12";
+        private const string PrimarySerialPortName = "COM2";
         private const string SecondarySerialPortName = "COM2";
 
         private static async Task<int> Main(string[] args)
@@ -30,6 +30,7 @@ namespace Samples
 
             try
             {
+                ModbusRtuOverTcpMasterReadInputs();
                 //ModbusTcpMasterReadInputs();
                 //SimplePerfTest();
                 //ModbusSerialRtuMasterWriteRegisters();
@@ -54,6 +55,30 @@ namespace Samples
 
             return 0;
         }
+
+        private static void ModbusRtuOverTcpMasterReadInputs()
+        {
+            while (true)
+            {
+                using (TcpClient client = new TcpClient("127.0.0.1", 502))
+                {
+                    //var factory = new ModbusFactory();
+                    var factory = new ModbusFactory();
+
+                    IModbusMaster master = factory.CreateRtuOverTcpMaster(client);
+
+                    // read five input values
+
+                    ushort startAddress = 0;
+                    ushort numInputs = 5;
+                    ushort[] inputs = master.ReadHoldingRegisters(1, startAddress, numInputs);
+                    inputs.ToList().ForEach(x => { Console.WriteLine(x); });
+
+                    Console.WriteLine("---------------------------------------------");
+                    Thread.Sleep(1000);
+                }
+            }
+         }
 
         /// <summary>
         ///     Simple Modbus serial RTU master write holding registers example.
